@@ -1,0 +1,38 @@
+import { readFile } from 'node:fs/promises'
+import lincy from '@lincy/eslint-config'
+
+const url = new URL('./.eslintrc-auto-import.json', import.meta.url)
+const autoImport = JSON.parse(
+    (await readFile(url)).toString(),
+)
+
+const config = lincy(
+    {
+        formatters: {
+            css: false,
+            graphql: true,
+            html: true,
+            markdown: true,
+        },
+        toml: false,
+        overrides: {
+            stylistic: {
+                'style/jsx-max-props-per-line': ['error', { maximum: 4 }],
+            },
+            ignores: [
+                '**/assets',
+                '**/static',
+            ],
+        },
+        unocss: true,
+    },
+    {
+        languageOptions: {
+            globals: {
+                ...autoImport.globals,
+            },
+        },
+    },
+)
+
+export default config
