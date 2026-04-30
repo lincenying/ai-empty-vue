@@ -64,7 +64,7 @@ type FetchOptions = import('ofetch').FetchOptions
 
 declare interface ApiType {
     abortKey: string
-    getAbourtKey: () => string
+    getAbortKey: () => string
     abortRequest: (abortKey?: string) => void
     generateRequestKey: (config: ServiceType) => string
     get: <T>(url: string, data?: Objable, options?: FetchOptions) => Promise<ResponseData<T>>
@@ -76,7 +76,7 @@ declare interface ApiType {
     delete: <T>(url: string, data?: Objable, options?: FetchOptions) => Promise<ResponseData<T>>
     delete: <T, U = Objable>(url: string, data?: Objable, options?: FetchOptions) => Promise<ResponseData<T> & U>
     RESTful: <T>(url: string, method: Methods, data?: Objable, options?: FetchOptions) => Promise<ResponseData<T>>
-    fetch: (url: string, method: Methods, data?: Objable, options?: FetchOptions) => Promise<any>
+    fetch: <T>(url: string, method: Methods, data?: Objable, options?: FetchOptions) => Promise<ResponseData<T>>
 }
 
 declare interface Window {

@@ -1,5 +1,5 @@
 import type { FetchOptions } from 'ofetch'
-import type { ServiceType } from '@/types/fetch.types'
+import type { Methods, ServiceType } from '@/types/fetch.types'
 import { isFormData, objToCookies } from '@lincy/utils'
 import { ElMessage } from 'element-plus'
 import { ofetch } from 'ofetch'
@@ -7,6 +7,16 @@ import qs from 'qs'
 import { baseURL } from '.'
 
 const pendingRequest = new Map<string, AbortController>()
+
+const isDev = import.meta.env.NODE_ENV === 'development'
+
+/**
+ * 判断是否为带统一业务 code 的 JSON 响应体
+ */
+function isBizPayload(v: unknown): v is ResponseData<unknown> {
+    return typeof v === 'object' && v !== null && 'code' in v && typeof (v as ResponseData<unknown>).code === 'number'
+}
+
 /**
  * ofetch Api 封装
  * ```
@@ -28,24 +38,25 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
     return {
         /** 取消请求的Key */
         abortKey: '',
-        getAbourtKey() {
+        getAbortKey() {
             return this.abortKey
         },
         /** 生成request的唯一的标识 */
         generateRequestKey(config: ServiceType) {
-            // 通过url，method，data生成唯一key
+            // 通过 url、method、data 与毫秒时间戳区分并发同源请求
             const { url, method, data } = config
-            return [url, method, qs.stringify(data), Date.now()].join('&')
+            return `${[url, method, qs.stringify(data ?? {})].join('&')}&_ts=${Date.now()}`
         },
 
         /** 取消请求 */
         abortRequest(abortKey?: string) {
-            abortKey = abortKey || this.abortKey
-            if (pendingRequest.has(abortKey)) {
-                const controller = pendingRequest.get(abortKey)
-                controller?.abort('取消请求') // 触发取消请求
-                pendingRequest.delete(abortKey) // 删除cancelKey
+            const key = abortKey ?? this.abortKey
+            if (!key || !pendingRequest.has(key)) {
+                return
             }
+            const controller = pendingRequest.get(key)
+            controller?.abort('取消请求')
+            pendingRequest.delete(key)
         },
         post(url: string, data?: Objable, options?: FetchOptions) {
             return this.RESTful(url, 'post', data, options)
@@ -59,21 +70,25 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
         delete(url: string, data?: Objable, options?: FetchOptions) {
             return this.RESTful(url, 'delete', data, options)
         },
-        async RESTful(url, method = 'get', data, options?: FetchOptions) {
-            return await this.fetch(url, method, data, options)
+        RESTful<T>(url: string, method: Methods = 'get', data?: Objable, options?: FetchOptions) {
+            return this.fetch<T>(url, method, data, options)
         },
-        async fetch(url, method, data, options?: FetchOptions) {
-            console.log('%c[request-url] >> ', 'color: red', baseURL + url, data || {})
-            let signal: AbortSignal | undefined
-            if (needSignal) {
-                this.abortKey = this.generateRequestKey({ url, method, data })
-                const controller = new AbortController()
-                signal = controller.signal
-
-                pendingRequest.set(this.abortKey, controller)
+        async fetch<T>(url: string, method: Methods, data?: Objable, options?: FetchOptions): Promise<ResponseData<T>> {
+            if (isDev) {
+                console.log('%c[request-url] >> ', 'color: red', baseURL + url, data ?? {})
             }
 
-            const response = await apiFetch(url, {
+            let currentAbortKey: string | undefined
+            let signal: AbortSignal | undefined
+            if (needSignal) {
+                currentAbortKey = this.generateRequestKey({ url, method, data: data ?? {} })
+                this.abortKey = currentAbortKey
+                const controller = new AbortController()
+                signal = controller.signal
+                pendingRequest.set(currentAbortKey, controller)
+            }
+
+            const mergedOptions: FetchOptions = {
                 method,
                 query: method === 'get' ? data : undefined,
                 body: method === 'get' ? undefined : data,
@@ -82,29 +97,49 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
                 ...options,
                 headers: {
                     ...options?.headers,
-                    ...isFormData(data) ? { } : { 'Content-Type': 'application/json' },
+                    ...(isFormData(data) ? {} : { 'Content-Type': 'application/json' }),
                 },
-                async onRequest({ request, options }) {
-                    // Log request
-                    console.log('[fetch request]', request, options)
+                onRequest({ request, options: reqOpts }) {
+                    if (isDev) {
+                        console.log('[fetch request]', request, reqOpts)
+                    }
                 },
                 onRequestError({ error }) {
                     ElMessage.closeAll()
-                    error && ElMessage.error('Sorry, The Data Request Failed')
-                    console.log('[fetch response error]', error)
+                    if (error) {
+                        ElMessage.error('Sorry, The Data Request Failed')
+                    }
+                    if (isDev) {
+                        console.log('[fetch response error]', error)
+                    }
                 },
                 onResponse({ response }) {
-                    if (response._data.code !== 200) {
-                        ElMessage.error(response._data.message)
-                        return response._data = null
+                    const payload = response._data
+                    if (!isBizPayload(payload)) {
+                        return
                     }
-                    return response._data = response._data || 'success'
+                    if (payload.code !== 200) {
+                        ElMessage.error(payload.message)
+                        response._data = null
+                        return
+                    }
+                    response._data = response._data || 'success'
                 },
                 onResponseError({ response }) {
-                    console.log('[fetch response error]', response.status)
+                    if (isDev) {
+                        console.log('[fetch response error]', response.status)
+                    }
                 },
-            })
-            return response
+            }
+
+            try {
+                return (await apiFetch(url, mergedOptions)) as ResponseData<T>
+            }
+            finally {
+                if (currentAbortKey) {
+                    pendingRequest.delete(currentAbortKey)
+                }
+            }
         },
     }
 }
