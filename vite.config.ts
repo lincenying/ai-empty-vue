@@ -41,6 +41,27 @@ export default defineConfig(({ mode }: ConfigEnv) => {
              * @see https://github.com/jeddygong/vite-plugin-progress/blob/main/README.zh-CN.md
              */
             Progress(),
+            {
+                name: 'generate-timestamp',
+                closeBundle() {
+                    const buildInfo = {
+                        buildTime: new Date().toISOString(),
+                        timestamp: Date.now(),
+                        buildMode: process.env.VITE_APP_ENV || 'production',
+                        outDir,
+                    }
+
+                    const content = JSON.stringify(buildInfo, null, 2)
+                    const outputPath = path.resolve(__dirname, outDir, 'timestamp.json')
+
+                    // 确保 outputPath 目录存在
+                    fs.mkdirSync(path.dirname(outputPath), { recursive: true })
+
+                    // 写入文件
+                    fs.writeFileSync(outputPath, content)
+                    console.log(`时间戳文件已生成: ${outputPath}`)
+                },
+            },
         ],
         resolve: {
             alias: {

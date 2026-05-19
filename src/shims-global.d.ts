@@ -99,6 +99,9 @@ declare interface ImportMeta {
         VITE_APP_API: string
         VITE_APP_SSR_API: string
         BASE_URL: string
-        SSR: string
+        MODE: string
+        DEV: boolean
+        PROD: boolean
+        SSR: boolean
     }
 }
