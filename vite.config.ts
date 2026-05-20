@@ -1,4 +1,5 @@
 import type { ConfigEnv } from 'vite'
+import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -8,7 +9,7 @@ import { defineConfig, loadEnv } from 'vite'
 import Inspect from 'vite-plugin-inspect'
 import Progress from 'vite-plugin-progress'
 
-import Build from './vite.config.build'
+import Build, { outDir } from './vite.config.build'
 import Components from './vite.config.components'
 import Css from './vite.config.css'
 import Macros from './vite.config.macros'
