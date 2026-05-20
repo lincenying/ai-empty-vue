@@ -8,12 +8,13 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:ts": "vue-tsc -b --noEmit",
-    "lint:css": "stylelint '**/*.{css,scss}' --fix"
+    "lint:ts": "vue-tsc -b --noEmit"
   },
   "dependencies": {
     "@lincy/utils": "^0.7.3",
     "element-plus": "^2.13.7",
+    "mitt": "^3.0.1",
+    "nprogress": "^0.2.0",
     "ofetch": "^1.5.1",
     "pinia": "^3.0.4",
     "qs": "^6.15.1",
@@ -26,6 +27,7 @@
     "@lincy/eslint-config": "^7.1.0",
     "@lincy/unocss-base-config": "^2.6.2",
     "@types/node": "^25.6.0",
+    "@types/nprogress": "^0.2.3",
     "@types/qs": "^6.15.0",
     "@unocss/eslint-plugin": "^66.6.8",
     "@vitejs/plugin-vue": "^6.0.6",

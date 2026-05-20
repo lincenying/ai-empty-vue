@@ -1,12 +1,4 @@
 import { webRemConfig } from '@lincy/unocss-base-config'
 import { fontSize } from './src/design.config'
 
-const baseConfig = webRemConfig({ baseFontSize: fontSize }, 'wind3', { preflight: 'on-demand' })
-
-export default {
-    ...baseConfig,
-    safelist: [
-        ...(baseConfig.safelist || []),
-        ...Array.from({ length: 10 }, (_, i) => `i-fad-digital${i}`),
-    ],
-}
+export default webRemConfig({ baseFontSize: fontSize }, 'wind3', { preflight: 'on-demand' })

@@ -27,7 +27,7 @@ body {
     }
 }
 
-#root {
+#app {
     display: block !important;
     min-height: 100vh;
 }
@@ -38,12 +38,6 @@ body {
     &::-webkit-scrollbar {
         display: none;
     }
-}
-
-@font-face {
-    font-family: led;
-    src: url('@/assets/fonts/lcd-bq.ttf') format('trueType');
-    font-display: block;
 }
 
 .fade-enter-active,

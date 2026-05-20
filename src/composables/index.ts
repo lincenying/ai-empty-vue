@@ -2,8 +2,9 @@ import type { AnyFn } from '@vueuse/core'
 import ls from 'store2'
 import { getCurrentInstance, onMounted, ref } from 'vue'
 import { onBeforeRouteLeave, useRoute } from 'vue-router'
+import { baseUrl } from '@/config'
 
-export const baseURL = import.meta.env.VITE_APP_API
+export const baseURL = baseUrl
 
 export function useGlobal() {
     const ins = getCurrentInstance()!

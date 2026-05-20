@@ -8,7 +8,10 @@ import {
 } from 'element-plus'
 
 import NProgress from 'nprogress'
+import emitter from '@/composables/emitter'
 
+import { loginMsgBox } from '@/utils/element'
+import 'nprogress/nprogress.css'
 import 'element-plus/es/components/loading/style/css'
 import 'element-plus/es/components/message/style/css'
 import 'element-plus/es/components/message-box/style/css'

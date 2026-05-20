@@ -27,7 +27,6 @@ export default (): PluginOption[] => ([
                 '@lincy/utils': ['deepClone', 'deepMerge', 'deepEqual', 'sleep', 'UTC2Date'],
                 'pinia': ['defineStore', 'storeToRefs'],
                 'vue-router': ['createRouter', 'createWebHashHistory'],
-                '@unhead/vue': ['createHead', 'useHead'],
             },
         ],
         dts: 'src/auto-imports.d.ts',

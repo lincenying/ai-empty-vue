@@ -1,7 +1,6 @@
 import type { ConfigEnv } from 'vite'
 import fs from 'node:fs'
 import path from 'node:path'
-import process from 'node:process'
 
 import { fileURLToPath } from 'node:url'
 import UnoCSS from 'unocss/vite'
@@ -16,9 +15,9 @@ import Macros from './vite.config.macros'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }: ConfigEnv) => {
-    process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
+    const env = loadEnv(mode, fileURLToPath(new URL('.', import.meta.url)))
     const __dirname = path.dirname(fileURLToPath(import.meta.url))
-    console.log(`当前编译环境: ${process.env.VITE_APP_ENV}`)
+    console.log(`当前编译环境: ${env.VITE_APP_ENV}`)
 
     return {
         base: './',
@@ -32,37 +31,30 @@ export default defineConfig(({ mode }: ConfigEnv) => {
             ...Macros(),
             ...Components(),
             UnoCSS(),
-            /**
-             * 检查Vite插件的中间状态
-             * @see https://github.com/antfu/vite-plugin-inspect#readme
-             */
-            Inspect(),
-            /**
-             * 打包时展示进度条的插件
-             * @see https://github.com/jeddygong/vite-plugin-progress/blob/main/README.zh-CN.md
-             */
-            Progress(),
-            {
-                name: 'generate-timestamp',
-                closeBundle() {
-                    const buildInfo = {
-                        buildTime: new Date().toISOString(),
-                        timestamp: Date.now(),
-                        buildMode: process.env.VITE_APP_ENV || 'production',
-                        outDir,
-                    }
+            ...(mode === 'development' ? [
+                Inspect(),
+            ] : [
+                {
+                    name: 'generate-timestamp',
+                    closeBundle() {
+                        const buildInfo = {
+                            buildTime: new Date().toISOString(),
+                            timestamp: Date.now(),
+                            buildMode: env.VITE_APP_ENV || 'production',
+                            outDir,
+                        }
 
-                    const content = JSON.stringify(buildInfo, null, 2)
-                    const outputPath = path.resolve(__dirname, outDir, 'timestamp.json')
+                        const content = JSON.stringify(buildInfo, null, 2)
+                        const outputPath = path.resolve(__dirname, outDir, 'timestamp.json')
 
-                    // 确保 outputPath 目录存在
-                    fs.mkdirSync(path.dirname(outputPath), { recursive: true })
-
-                    // 写入文件
-                    fs.writeFileSync(outputPath, content)
-                    console.log(`时间戳文件已生成: ${outputPath}`)
+                        fs.mkdirSync(path.dirname(outputPath), { recursive: true })
+                        fs.writeFileSync(outputPath, content)
+                        console.log(`时间戳文件已生成: ${outputPath}`)
+                    },
                 },
-            },
+            ]),
+            Progress(),
+
         ],
         resolve: {
             alias: {

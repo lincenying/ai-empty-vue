@@ -4,12 +4,15 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-export const outDir = '../_build/chat_v2_2'
+export const outDir = 'dist'
 
 interface CbmDevProxy {
     on: (event: string, listener: (...args: unknown[]) => void) => unknown
 }
 
+/**
+ * 开发代理 SSE 流式响应时禁用缓冲
+ */
 function configureCbmDevProxy(proxy: CbmDevProxy): void {
     proxy.on('proxyRes', (...args: unknown[]) => {
         const proxyRes = args[0] as { headers?: Record<string, string | string[] | undefined> }
@@ -28,11 +31,8 @@ const config: { server: ServerOptions, build: BuildOptions } = {
     server: {
         port: 5173,
         proxy: {
-            // 代理配置
             '/cbm': {
-                target: 'http://192.168.5.202:18101',
-                // target: 'http://192.168.5.210:18101',
-                // target: "http://192.168.5.166:18101",
+                target: 'http://192.168.5.202:28080',
                 changeOrigin: true,
                 ws: true,
                 configure: configureCbmDevProxy,
@@ -53,17 +53,8 @@ const config: { server: ServerOptions, build: BuildOptions } = {
             external: /static\/.*?\.[cm]*js/,
             output: {
                 manualChunks(id: string) {
-                    // 处理css分块
-                    // if (id.includes('.css') || id.includes('.scss') || id.includes('.sass') || id.includes('.less')) {
-                    //     if (id.includes('node_modules'))
-                    //         return 'vendor'
-                    //     return 'main'
-                    // }
                     if (id.includes('node_modules')) {
-                        if (!id.includes('echarts') && !id.includes('zrender')) {
-                            return 'vendor'
-                        }
-                        return 'echarts'
+                        return 'vendor'
                     }
                     if (id.includes('__uno.css')) {
                         return 'unocss'

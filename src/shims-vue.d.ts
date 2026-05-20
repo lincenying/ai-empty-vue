@@ -15,14 +15,7 @@ declare module '@vue/runtime-core' {
         $prompt: typeof ElMessageBox.prompt
         $message: typeof ElMessage
         $notify: typeof ElNotification
-        initialState: Record<string, any>
-        globalState: Record<string, any>
     }
 }
 
 export {}
-declare module 'vue' {
-    interface ComponentCustomOptions {
-        asyncData?: (ctx: import('./types/global.types').AsyncDataConfig) => Promise<any>
-    }
-}

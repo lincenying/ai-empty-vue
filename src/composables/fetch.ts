@@ -4,11 +4,12 @@ import { isFormData, objToCookies } from '@lincy/utils'
 import { ElMessage } from 'element-plus'
 import { ofetch } from 'ofetch'
 import qs from 'qs'
-import { baseURL } from '.'
+import emitter, { emitNeedLogin } from '@/composables/emitter'
+import { baseUrl } from '@/config'
 
 const pendingRequest = new Map<string, AbortController>()
 
-const isDev = import.meta.env.NODE_ENV === 'development'
+const isDev = import.meta.env.DEV
 
 /**
  * 判断是否为带统一业务 code 的 JSON 响应体
@@ -19,16 +20,10 @@ function isBizPayload(v: unknown): v is ResponseData<unknown> {
 
 /**
  * ofetch Api 封装
- * ```
-    get<T>(url: string, params?: Objable, header?: Objable, checkCode?: boolean): Promise<ResponseData<T>>
-    post<T>(url: string, data?: Objable, header?: Objable, checkCode?: boolean): Promise<ResponseData<T>>
-    put<T>(url: string, data?: Objable, header?: Objable, checkCode?: boolean): Promise<ResponseData<T>>
-    delete<T>(url: string, data?: Objable, header?: Objable, checkCode?: boolean): Promise<ResponseData<T>>
- * ```
  */
 export const useApi: (cookies?: Record<string, string | number | boolean>, needSignal?: boolean) => ApiType = (cookies, needSignal = false) => {
     const apiFetch = ofetch.create({
-        baseURL,
+        baseURL: baseUrl,
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Cookie': (cookies && objToCookies(cookies)) || '',
@@ -36,19 +31,14 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
     })
 
     return {
-        /** 取消请求的Key */
         abortKey: '',
         getAbortKey() {
             return this.abortKey
         },
-        /** 生成request的唯一的标识 */
         generateRequestKey(config: ServiceType) {
-            // 通过 url、method、data 与毫秒时间戳区分并发同源请求
             const { url, method, data } = config
             return `${[url, method, qs.stringify(data ?? {})].join('&')}&_ts=${Date.now()}`
         },
-
-        /** 取消请求 */
         abortRequest(abortKey?: string) {
             const key = abortKey ?? this.abortKey
             if (!key || !pendingRequest.has(key)) {
@@ -75,7 +65,7 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
         },
         async fetch<T>(url: string, method: Methods, data?: Objable, options?: FetchOptions): Promise<ResponseData<T>> {
             if (isDev) {
-                console.log('%c[request-url] >> ', 'color: red', baseURL + url, data ?? {})
+                console.log('%c[request-url] >> ', 'color: red', baseUrl + url, data ?? {})
             }
 
             let currentAbortKey: string | undefined
@@ -92,7 +82,7 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
                 method,
                 query: method === 'get' ? data : undefined,
                 body: method === 'get' ? undefined : data,
-                timeout: 10000, // Timeout after 10 seconds
+                timeout: 10000,
                 signal,
                 ...options,
                 headers: {
@@ -107,7 +97,7 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
                 onRequestError({ error }) {
                     ElMessage.closeAll()
                     if (error) {
-                        ElMessage.error('Sorry, The Data Request Failed')
+                        ElMessage.error('数据请求失败，请稍后重试')
                     }
                     if (isDev) {
                         console.log('[fetch response error]', error)
@@ -118,14 +108,21 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
                     if (!isBizPayload(payload)) {
                         return
                     }
-                    if (payload.code !== 200) {
-                        ElMessage.error(payload.message)
+                    if (payload.code === 401) {
+                        emitNeedLogin()
                         response._data = null
                         return
                     }
-                    response._data = response._data || 'success'
+                    if (payload.code !== 200) {
+                        ElMessage.error(payload.message || '请求失败')
+                        emitter.emit('api-error', payload.message || '请求失败')
+                        response._data = null
+                    }
                 },
                 onResponseError({ response }) {
+                    if (response.status === 401) {
+                        emitNeedLogin()
+                    }
                     if (isDev) {
                         console.log('[fetch response error]', response.status)
                     }
@@ -143,8 +140,10 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
         },
     }
 }
+
 if (typeof window !== 'undefined') {
     window.$$api = useApi()
 }
+
 export const $api = useApi()
 export const $fetch = useApi(undefined, true)

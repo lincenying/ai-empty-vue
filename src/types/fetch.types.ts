@@ -9,5 +9,4 @@ export interface ServiceType {
     checkCode?: boolean
     /** 超时时间 */
     timeout?: number
-    [key: string]: any
 }
