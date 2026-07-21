@@ -4,7 +4,7 @@ import { isFormData, objToCookies } from '@lincy/utils'
 import { ElMessage } from 'element-plus'
 import { ofetch } from 'ofetch'
 import qs from 'qs'
-import emitter, { emitNeedLogin } from '@/composables/emitter'
+import emitter from '@/composables/emitter'
 import { baseUrl } from '@/config'
 
 const pendingRequest = new Map<string, AbortController>()
@@ -93,6 +93,7 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
                     if (isDev) {
                         console.log('[fetch request]', request, reqOpts)
                     }
+                    emitter.emit('nprogress-start', { type: 'api', url })
                 },
                 onRequestError({ error }) {
                     ElMessage.closeAll()
@@ -109,7 +110,7 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
                         return
                     }
                     if (payload.code === 401) {
-                        emitNeedLogin()
+                        emitter.emit('need-login')
                         response._data = null
                         return
                     }
@@ -121,7 +122,7 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
                 },
                 onResponseError({ response }) {
                     if (response.status === 401) {
-                        emitNeedLogin()
+                        emitter.emit('need-login')
                     }
                     if (isDev) {
                         console.log('[fetch response error]', response.status)
@@ -136,6 +137,7 @@ export const useApi: (cookies?: Record<string, string | number | boolean>, needS
                 if (currentAbortKey) {
                     pendingRequest.delete(currentAbortKey)
                 }
+                emitter.emit('nprogress-done', { type: 'api', url })
             }
         },
     }

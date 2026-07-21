@@ -1,5 +1,17 @@
 # 变更记录
 
+## 2026-07-21 16:55:00
+
+### 改动内容
+
+- 修复 `src/config/element.ts` 中 `NodeJS.Timeout` 类型在浏览器 tsconfig 下找不到命名空间的问题，改为 `ReturnType<typeof setTimeout>`
+
+### Commit Message
+
+```
+fix: 修复 NProgress 定时器类型依赖 NodeJS 命名空间的问题
+```
+
 ## 2026-05-20
 
 ### 改动内容
