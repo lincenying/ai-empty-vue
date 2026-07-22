@@ -37,6 +37,7 @@ interface EmitterEvents {
     'need-login': void
     'api-error': string
     'cancel-interval': void
+    'nprogress-reset': void
     'nprogress-start': { type: string, url: string }
     'nprogress-done': { type: string, url: string }
 }
