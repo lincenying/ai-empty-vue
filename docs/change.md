@@ -1,5 +1,18 @@
 # 变更记录
 
+## 2026-08-20 14:09:00
+
+### 改动内容
+
+- 修复 UnoCSS 66.7 / 66.8 混用导致 `vite` 启动崩溃（`activatedRules` 为 undefined）
+- 在 `pnpm-workspace.yaml` 增加 overrides，强制 `unocss` 及相关 `@unocss/*` 统一为 66.8.0
+
+### Commit Message
+
+```
+fix: 统一 UnoCSS 版本以修复开发服务器启动失败
+```
+
 ## 2026-07-21 16:55:00
 
 ### 改动内容

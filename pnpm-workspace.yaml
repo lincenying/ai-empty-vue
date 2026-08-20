@@ -33,3 +33,15 @@ allowBuilds:
   '@parcel/watcher': true
   esbuild: true
   vue-demi: true
+
+# 强制 UnoCSS 及相关子包同版本，避免 @lincy/unocss-base-config 嵌套的 66.7
+# 与项目 66.8 混用导致 activatedRules / getActivatedRules API 不兼容
+overrides:
+  '@unocss/core': 66.8.0
+  '@unocss/preset-attributify': 66.8.0
+  '@unocss/preset-icons': 66.8.0
+  '@unocss/preset-mini': 66.8.0
+  '@unocss/preset-wind3': 66.8.0
+  '@unocss/preset-wind4': 66.8.0
+  '@unocss/vite': 66.8.0
+  unocss: 66.8.0
