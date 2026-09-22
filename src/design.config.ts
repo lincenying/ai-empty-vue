@@ -1,3 +1,5 @@
+/** 是否需要rem转换 */
+export const needRem = true
 /**
  * 设计稿宽度（与 global.scss / postcss 转换一致）
  * 组件内尺寸请写 **px**，勿再手写 3800 视口公式；缩放由 html font-size + px→rem 完成
