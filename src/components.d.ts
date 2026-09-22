@@ -12,6 +12,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BaseDialog: typeof import('./components/BaseDialog.vue')['default']
+    BaseDrawer: typeof import('./components/BaseDrawer.vue')['default']
+    BaseTable: typeof import('./components/BaseTable.vue')['default']
+    ConfirmDialog: typeof import('./components/ConfirmDialog.vue')['default']
     ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
@@ -20,6 +24,10 @@ declare module 'vue' {
 
 // For TSX support
 declare global {
+  const BaseDialog: typeof import('./components/BaseDialog.vue')['default']
+  const BaseDrawer: typeof import('./components/BaseDrawer.vue')['default']
+  const BaseTable: typeof import('./components/BaseTable.vue')['default']
+  const ConfirmDialog: typeof import('./components/ConfirmDialog.vue')['default']
   const ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']
   const RouterLink: typeof import('vue-router')['RouterLink']
   const RouterView: typeof import('vue-router')['RouterView']

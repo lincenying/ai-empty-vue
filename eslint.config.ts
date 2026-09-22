@@ -22,6 +22,7 @@ const config = lincy(
             ignores: [
                 '**/assets',
                 '**/static',
+                '**/docs/**/*.md',
             ],
         },
         unocss: true,
