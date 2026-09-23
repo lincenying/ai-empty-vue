@@ -24,9 +24,9 @@
     "vue-router": "^5.3.1"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.135",
+    "@iconify-json/lucide": "^1.2.136",
     "@lincy/eslint-config": "^8.0.1",
-    "@lincy/unocss-base-config": "^2.8.1",
+    "@lincy/unocss-base-config": "^2.8.2",
     "@types/node": "^26.6.2",
     "@types/nprogress": "^0.2.3",
     "@types/qs": "^6.15.1",
