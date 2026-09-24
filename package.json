@@ -2,7 +2,7 @@
   "name": "ai-empty-vue",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@12.5.1",
+  "packageManager": "pnpm@12.6.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -26,7 +26,7 @@
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.136",
     "@lincy/eslint-config": "^8.0.1",
-    "@lincy/unocss-base-config": "^2.8.2",
+    "@lincy/unocss-base-config": "^3.0.0",
     "@types/node": "^26.6.2",
     "@types/nprogress": "^0.2.3",
     "@types/qs": "^6.15.1",

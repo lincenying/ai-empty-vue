@@ -1,42 +1,16 @@
-import type { Preset } from 'unocss'
 import { webConfig, webRemConfig } from '@lincy/unocss-base-config'
 import { fontSize, needRem } from './src/design.config.ts'
 
-/** UnoCSS / Tailwind 无单位尺寸与 xl 等命名档按 16px 根字号生成 rem */
-const TAILWIND_ROOT_FONT_SIZE = 16
-
 /**
- * html font-size 为设计稿基准（100）时，把按 16px 根字号写出的 rem 换成当前根字号下的等像素值。
- * 例如 h-20 为 5rem（80px）→ 0.8rem，p-6 为 1.5rem（24px）→ 0.24rem，w-xl / rounded-xl 同理。
- * 必须排在 px→rem 之前，避免稿面 px 被再缩一次。
+ * 注意:
+ * Unocss中的尺寸单位说明: 无单位或rem作为单位时, 需以16px的根字号进行书写
+ * 项目根字号为100px, 所以需要开启 `noneUnti2Rem` rem单位转换, 否则会按照16px的根字号进行转换
+ * 例如: h-20 为 5rem（80px）→ 0.8rem，p-6 为 1.5rem（24px）→ 0.24rem，w-xl / rounded-xl 同理。
  */
-function presetScaleRem(baseFontSize: number): Preset {
-    const scale = TAILWIND_ROOT_FONT_SIZE / baseFontSize
-    return {
-        name: 'preset-scale-rem',
-        enforce: 'pre',
-        postprocess(util) {
-            util.entries.forEach((entry) => {
-                const value = entry[1]
-                if (typeof value !== 'string' || !value.includes('rem'))
-                    return
-                entry[1] = value.replace(/(-?(?:\d+(?:\.\d+)?|\.\d+))rem/g, (_, raw: string) => {
-                    const rem = Number((Number(raw) * scale).toFixed(6))
-                    return `${rem}rem`
-                })
-            })
-        },
-    }
-}
-
-const base = needRem ? webRemConfig({ baseFontSize: fontSize }, 'wind3', { preflight: 'on-demand' }) : webConfig('wind3', { preflight: 'on-demand' })
+const base = needRem ? webRemConfig({ baseFontSize: fontSize, noneUnti2Rem: true }, 'wind3', { preflight: 'on-demand' }) : webConfig('wind3', { preflight: 'on-demand' })
 
 export default {
     ...base,
-    presets: [
-        ...needRem ? [presetScaleRem(fontSize)] : [],
-        ...(base.presets ?? []),
-    ],
     theme: {
         ...base.theme,
         colors: {
