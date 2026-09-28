@@ -2,6 +2,8 @@ import type { BuildOptions, ServerOptions } from 'vite'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+const port = 5103
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export const outDir = 'dist'
@@ -29,7 +31,7 @@ function configureCbmDevProxy(proxy: CbmDevProxy): void {
 
 const config: { server: ServerOptions, build: BuildOptions } = {
     server: {
-        port: 5173,
+        port,
         proxy: {
             '/cbm': {
                 target: 'http://192.168.5.202:28080',
@@ -37,6 +39,9 @@ const config: { server: ServerOptions, build: BuildOptions } = {
                 ws: true,
                 configure: configureCbmDevProxy,
             },
+        },
+        ws: {
+            port: Number(`1{port}`),
         },
     },
     build: {
